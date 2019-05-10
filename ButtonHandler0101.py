@@ -1,6 +1,6 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-from Test import Ui_MainWindow
+from MainUI0101 import Ui_MainWindow
 
 class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -24,25 +24,17 @@ class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # sends command and prints to textBrowser
     def pushbuttonsendcommand(self):
-
-
-
-        if self.radioButtonSendConfirm.isChecked:
-            preppedSpeed = int(self.labelPreppedTargetSpeed.text())  # NEED to make all labels 0 initially
-            preppedTime = int(self.labelPreppedInTime.text())
-            preppedSetting = self.labelPreppedCurveMode.text()
-
-            toBeSent = "Target speed of " + str(preppedSpeed) + " in " + str(
-                preppedTime) + " seconds using a " + preppedSetting + " command sent."
-            self.textBrowserDisplay.setText(toBeSent)
-        if not self.radioButtonSendConfirm.isChecked:
+        preppedSpeed = int(self.labelPreppedTargetSpeed.text())  # NEED to make all labels 0 initially
+        preppedTime = int(self.labelPreppedInTime.text())
+        preppedSetting = self.labelPreppedCurveMode.text()
+        if not self.checkBoxSendConfirm.isChecked():
             toBeSent = "Send Confirm is not checked."
             self.textBrowserDisplay.setText(toBeSent)
-
-
-
-
-        #need actual send code here
+        if self.checkBoxSendConfirm.isChecked():
+            toBeSent = "Target speed of " + str(preppedSpeed) + " in " + str(preppedTime) + " seconds using a " + preppedSetting + " command sent."
+            self.textBrowserDisplay.setText(toBeSent)
+            self.checkBoxSendConfirm.setChecked(False)
+          #need actual send code here
 
     def pushbuttonhaltcommand(self):
         #sends halt command and prints to textBrowser

@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file 'AZLoop.ui'
-#
-# Created by: PyQt5 UI code generator 5.12.2
-#
-# WARNING! All changes made in this file will be lost!
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
@@ -91,9 +83,6 @@ class Ui_MainWindow(object):
         self.groupBoxPreppedSettings.raise_()
         self.pushButtonPrepSettings.raise_()
         self.comboBoxCurveChoices.raise_()
-        self.radioButtonSendConfirm = QtWidgets.QCheckBox(self.centralwidget)
-        self.radioButtonSendConfirm.setGeometry(QtCore.QRect(620, 410, 121, 17))
-        self.radioButtonSendConfirm.setObjectName("radioButtonSendConfirm")
         self.pushButtonHaltCommand = QtWidgets.QPushButton(self.centralwidget)
         self.pushButtonHaltCommand.setGeometry(QtCore.QRect(620, 440, 111, 51))
         self.pushButtonHaltCommand.setObjectName("pushButtonHaltCommand")
@@ -106,12 +95,15 @@ class Ui_MainWindow(object):
         self.pushButtonSendCommand = QtWidgets.QPushButton(self.centralwidget)
         self.pushButtonSendCommand.setGeometry(QtCore.QRect(620, 340, 111, 51))
         self.pushButtonSendCommand.setObjectName("pushButtonSendCommand")
+        self.checkBoxSendConfirm = QtWidgets.QCheckBox(self.centralwidget)
+        self.checkBoxSendConfirm.setGeometry(QtCore.QRect(620, 400, 111, 23))
+        self.checkBoxSendConfirm.setObjectName("checkBoxSendConfirm")
         self.groupBoxDataValues.raise_()
         self.groupBoxSettings.raise_()
         self.groupBoxDisplay.raise_()
         self.pushButtonSendCommand.raise_()
         self.pushButtonHaltCommand.raise_()
-        self.radioButtonSendConfirm.raise_()
+        self.checkBoxSendConfirm.raise_()
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 758, 22))
@@ -148,20 +140,11 @@ class Ui_MainWindow(object):
         self.labelPreppedCurveModeLabel.setText(_translate("MainWindow", "Curve Mode:"))
         self.labelPreppedCurveMode.setText(_translate("MainWindow", "TextLabel"))
         self.pushButtonPrepSettings.setText(_translate("MainWindow", "Prep Settings"))
-        self.radioButtonSendConfirm.setText(_translate("MainWindow", "Send Confirm"))
         self.pushButtonHaltCommand.setText(_translate("MainWindow", "Halt Command"))
         self.groupBoxDisplay.setTitle(_translate("MainWindow", "Display"))
         self.pushButtonSendCommand.setText(_translate("MainWindow", "Send Command"))
+        self.checkBoxSendConfirm.setText(_translate("MainWindow", "Send Confirm"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.actionHi_D.setText(_translate("MainWindow", "Hi :D"))
 
 
-#initializes application
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
