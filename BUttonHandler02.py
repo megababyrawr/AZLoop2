@@ -86,6 +86,7 @@ class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
 
+
     def prepdatavalues(self):
         self.labelPreppedTargetSpeed.setText(self.lineEditTargetSpeed.text())
         self.labelPreppedInTime.setText(self.lineEditInTime.text())
