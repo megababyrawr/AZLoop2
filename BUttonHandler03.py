@@ -1,6 +1,6 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-from MainUI02 import Ui_MainWindow
+from MainUI03 import Ui_MainWindow
 import test_python_fpga
 class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -40,8 +40,6 @@ class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
             self.labelCurve.setText("Instant Curve")
         elif self.a_chosenCurve == 1:
             self.labelCurve.setText("Linear Curve")
-        else:
-            self.labelCurve.setText("Nothing")
 
     def resetcurrentcurve(self):
         self.a_chosenCurve = 0
@@ -54,8 +52,9 @@ class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
             return 1
         else:
             return 9
+
     def setmode(self):
-        tempmode = self.getmode
+        tempmode = self.getmode()
         if tempmode == 0:
             self.a_targetMode = 0
             self.labelMode.setText("Speed Mode")
@@ -69,9 +68,9 @@ class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
         print("Mode reset to 0")
     def getdirection(self):
         if self.radioButtonFoward.isChecked():
-            return 0
-        elif self.radioButtonBackward.isChecked():
             return 1
+        elif self.radioButtonBackward.isChecked():
+            return 0
         else:
             return 9
     def setdirection(self):
@@ -113,56 +112,63 @@ class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
         intimeedit = self.lineEditInTime.text()
         torquelimitedit = self.lineEditTorqueLimit.text()
 
-        if targetspeededit == "":
-            self.labelPreppedTargetSpeed.setText("0")
-        elif int(targetspeededit) >= 0:
-            self.labelPreppedTargetSpeed.setText(targetspeededit)
-        else:
+        try:
+            if targetspeededit == "":
+                self.labelPreppedTargetSpeed.setText("0")
+            elif int(targetspeededit) >= 0:
+                self.labelPreppedTargetSpeed.setText(targetspeededit)
+            else:
+                print("Target Speed Cannot be negative")
+        except ValueError:
             print("Invalid Target Speed")
 
-        if intimeedit == "":
-            self.labelPreppedInTime.setText("0")
-        elif int(intimeedit) >= 0:
-            self.labelPreppedInTime.setText(intimeedit)
-        else:
+        try:
+            if intimeedit == "":
+                self.labelPreppedInTime.setText("0")
+            elif int(intimeedit) >= 0:
+                self.labelPreppedInTime.setText(intimeedit)
+            else:
+                print("In Time Cannot be negative")
+        except ValueError:
             print("Invalid In Time")
 
-        if torquelimitedit == "":
-            self.labelTorqueLimit.setText("0")
-        elif int(torquelimitedit) >=0:
-            self.labelTorqueLimit.setText(targetspeededit)
-        else:
+        try:
+            if torquelimitedit == "":
+                self.labelPreppedTorqueLimit.setText("0")
+            elif int(torquelimitedit) >=0:
+                self.labelPreppedTorqueLimit.setText(torquelimitedit)
+            else:
+                print("Torque Limit cannot be negative")
+        except ValueError:
             print("Invalid Torque Limit")
-
-
-    def pushbuttonprepsettings(self):
-        self.labelPreppedCurveMode.setText(self.comboBoxCurveChoices.currentText())
 
     # sends command and prints to textBrowser
     def pushbuttonsendcommand(self):
-        preppedSpeed = int(self.labelPreppedTargetSpeed.text())  # NEED to make all labels 0 initially
-        preppedTime = int(self.labelPreppedInTime.text())
-        preppedSetting = int(self.labelPreppedCurveMode.text())
+        try:
+            preppedSpeed = int(self.labelPreppedTargetSpeed.text())
+            preppedTime = int(self.labelPreppedInTime.text())
+            preppedTorqueLimit = int(self.labelPreppedTorqueLimit.text())
+        except AttributeError:
+            print("Invalid Prepped Data Values")
         if not self.checkBoxSendConfirm.isChecked():
             toBeSent = "Send Confirm is not checked."
             self.textBrowserDisplay.setText(toBeSent)
         if self.checkBoxSendConfirm.isChecked():
 
-            self.setdirection()
-            self.setmode()
-            self.inv_enableon()
+            self.a_targetSpeed = preppedSpeed
+            self.a_targetTime = preppedTime
+            self.a_torqueLimit = preppedTorqueLimit
 
-            test_python_fpga.send_settings(self.targetTorque, self.targetSpeed, self.direction, self.inv_enable, self.inv_discharge, self.targetMode, self.torqueLimit, self.targetTime)
+            test_python_fpga.send_command(self.a_targetTorque, self.a_targetSpeed, self.a_direction, self.a_inv_enable,
+                                          self.a_inv_discharge, self.a_targetMode, self.a_torqueLimit, self.a_targetTime
+                                          )
 
-            toBeSent = "Target speed of " + str(preppedSpeed) + " in " + str(preppedTime) + " seconds using a " + preppedSetting + " command sent."
+            toBeSent = "Target speed of " + str(preppedSpeed) + " in " + str(preppedTime) +\
+                       " seconds with a torque limit of " + str(preppedTorqueLimit) + " command sent."
+
             self.textBrowserDisplay.setText(toBeSent)
             self.checkBoxSendConfirm.setChecked(False)
 
-
-
-
-
-            #need actual send code here
     def pushbuttonhaltcommand(self):
         #sends halt command and prints to textBrowser
         self.textBrowserDisplay.setText("Halt Command Sent")
