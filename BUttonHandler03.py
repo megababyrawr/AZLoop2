@@ -27,25 +27,25 @@ class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
     a_targetTime = 0 #int
     a_chosenCurve = 0 #int, 0 is instant, 1 is linear
 
-    def getnewcurve(self):
+    def getnewcurve(self): #returns number of selected curve
         currentcurvetext = self.comboBoxCurveChoices.currentText()
         print(currentcurvetext)
         if currentcurvetext == "Instant Curve":
             return 0
         elif currentcurvetext == "Linear Curve":
             return 1
-    def setcurrentcurve(self):
+    def setcurrentcurve(self): #sets a_chosenCurve to new chosen curve
         self.a_chosenCurve = self.getnewcurve()
         if self.a_chosenCurve == 0:
             self.labelCurve.setText("Instant Curve")
         elif self.a_chosenCurve == 1:
             self.labelCurve.setText("Linear Curve")
 
-    def resetcurrentcurve(self):
+    def resetcurrentcurve(self): #puts a_chosenCurve to 0
         self.a_chosenCurve = 0
         print("Chosen Curve reset to 0")
 
-    def getmode(self):
+    def getmode(self): #returns number of chosen mode
         if self.radioButtonSpeed.isChecked():
             return 0
         elif self.radioButtonTorque.isChecked():
@@ -53,7 +53,7 @@ class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             return 9
 
-    def setmode(self):
+    def setmode(self): #sets a_targetMode to selected mode
         tempmode = self.getmode()
         if tempmode == 0:
             self.a_targetMode = 0
@@ -63,17 +63,17 @@ class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
             self.labelMode.setText("Torque Mode")
         elif tempmode == 9:
             print("No mode is chosen")
-    def resetmode(self):
+    def resetmode(self): #sets a_targetMode to 0
         self.a_targetMode = 0
         print("Mode reset to 0")
-    def getdirection(self):
+    def getdirection(self): #returns chosen direction
         if self.radioButtonFoward.isChecked():
             return 1
         elif self.radioButtonBackward.isChecked():
             return 0
         else:
             return 9
-    def setdirection(self):
+    def setdirection(self): #sets a_direction to chosen direction
         tempdirection = self.getdirection()
         if tempdirection == 1:
             self.a_direction = 1
@@ -83,16 +83,24 @@ class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
             self.labelDirection.setText("Backward")
         elif tempdirection == 9:
             print("No direction is chosen")
-    def resetdirection(self):
+    def resetdirection(self): #sets a_direction to 0
         self.a_direction = 0
         print("Direction reset to 0")
-    def inv_enableon(self):
+    def inv_enableon(self): #sets inv_enable to 1
         self.a_inv_enable = 1
         print("Enableon set to 1")
-    def inv_enableoff(self):
+    def inv_enableoff(self): #sets inv_enable to 0
         self.a_inv_enable = 0
         print("Enableon set to 0")
-    def on(self):
+
+    def resetspeed(self): #sets a_targetSpeed to 0
+        self.a_targetSpeed = 0
+    def resetintime(self): #sets a_targeTime to 0
+        self.a_targetTime = 0 #will need to change this?
+    def resettorquelimit(self): #sets a_torqueLimit to 0
+        self.a_torqueLimit = 0
+
+    def on(self): #sets the settings and inv_enable to 1, then sends settings
         self.setcurrentcurve()
         self.setdirection()
         self.setmode()
@@ -107,7 +115,7 @@ class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
         return 0
 
 
-    def prepdatavalues(self):
+    def prepdatavalues(self): #retrieves user input and preps it into Prepped Data Values
         targetspeededit = self.lineEditTargetSpeed.text()
         intimeedit = self.lineEditInTime.text()
         torquelimitedit = self.lineEditTorqueLimit.text()
@@ -143,7 +151,7 @@ class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
             print("Invalid Torque Limit")
 
     # sends command and prints to textBrowser
-    def pushbuttonsendcommand(self):
+    def pushbuttonsendcommand(self): #sends contents of Prepped Data Values
         try:
             preppedSpeed = int(self.labelPreppedTargetSpeed.text())
             preppedTime = int(self.labelPreppedInTime.text())
@@ -153,7 +161,7 @@ class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
         if not self.checkBoxSendConfirm.isChecked():
             toBeSent = "Send Confirm is not checked."
             self.textBrowserDisplay.setText(toBeSent)
-        if self.checkBoxSendConfirm.isChecked():
+        elif self.checkBoxSendConfirm.isChecked():
 
             self.a_targetSpeed = preppedSpeed
             self.a_targetTime = preppedTime
@@ -169,9 +177,19 @@ class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
             self.textBrowserDisplay.setText(toBeSent)
             self.checkBoxSendConfirm.setChecked(False)
 
-    def pushbuttonhaltcommand(self):
+    def pushbuttonhaltcommand(self): #sends halt values to fpga and Prepped Data Values accordingly
         #sends halt command and prints to textBrowser
         self.textBrowserDisplay.setText("Halt Command Sent")
+
+        self.resetspeed()
+        self.resetintime()
+        self.resettorquelimit()
+
+
+
+
+
+
 
         #actual halt code
 
