@@ -1,6 +1,6 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-from MainUI04 import Ui_MainWindow
+from MainUI05 import Ui_MainWindow
 import test_python_fpga
 class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -17,6 +17,9 @@ class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.pushButtonHaltCommand.clicked.connect(self.pushbuttonhaltcommand)
 
+        self.pushButtonLogName.clicked.connect(self.pushbuttonlogname)
+
+
     a_targetTorque = 0 #int
     a_targetSpeed = 0 #int
     a_direction = 0 #boolean 1 is forward, 0 is backward
@@ -26,6 +29,15 @@ class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
     a_torqueLimit = 0 #int
     a_targetTime = 0 #int
     a_chosenCurve = 0 #int, 0 is instant, 1 is linear
+
+    mirror_direction = "backward"
+    mirror_inv_enable = "inv enable on"
+    mirror_targetMode = "speed mode"
+    mirror_chosenCure = "instant curve"
+
+    logname = "LogsDefault.txt"
+    consolelogname = "Console"
+
 
     def getnewcurve(self): #returns number of selected curve
         currentcurvetext = self.comboBoxCurveChoices.currentText()
@@ -100,10 +112,20 @@ class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
     def resettorquelimit(self): #sets a_torqueLimit to 0
         self.a_torqueLimit = 0
 
+    def writetoconsolelog(self, input):
+        with open(self.consolelogname, 'w') as console_log_file:
+            console_log_file.write("\n" + input)
+        self.updateconsole()
+
     def updateconsole(self):
-        with open('DisplayConsole.txt', 'a') as display_console:
-            logstr = str(display_console.read())
-        self.textBrowserDisplay.setText(logstr)
+        with open(self.consolelogname, 'r') as display_console:
+            consolelogstr = str(display_console.read())
+        self.textBrowserDisplay.setText(consolelogstr)
+        self.textBrowserDisplay.verticalScrollBar().setValue(self.textBrowserDisplay.verticalScrollBar().maximum())
+    def writetolog(self, input):
+        with open(self.logname, 'w') as log_file:
+            log_file.write(input + "\n")
+
 
 
     def on(self): #sets the settings and inv_enable to 1, then sends settings
@@ -114,14 +136,30 @@ class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
             self.inv_enableon()
             test_python_fpga.send_settings(self.a_chosenCurve)
             test_python_fpga.send_enable(self.a_inv_enable)
+
+            self.writetolog("'on' function executed correctly.")
+            self.writetoconsolelog("Turn on successful.\nCurve mode is: " + self.mirror_chosenCure + "\nMode is: " +
+                                   self.mirror_targetMode)
+
+
         else:
             print("Check speed or torque mode")
-            with open('DisplayConsole.txt', 'a') as display_console:
-                display_console.write("Check speed or torque mode")
+            str1 = "hello my name is\n\n\n\n\n\n\n\n\n\n\n\ndf"
+            self.writetolog(str1)
             self.updateconsole()
 
     def off(self):
         return 0
+
+    def pushbuttonlogname(self):
+        temp = str(self.lineEditLogName.text())
+
+        if (temp == ""):
+            print("Warning: No specified log file chosen. A default name will be used if turned on.")
+        else:
+            self.labelCurrentLog.setText(temp)
+            self.logname = temp
+            self.consolelogname = self.consolelogname + temp
 
 
     def prepdatavalues(self): #retrieves user input and preps it into Prepped Data Values
