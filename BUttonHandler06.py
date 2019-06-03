@@ -2,6 +2,7 @@ import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from MainUI05 import Ui_MainWindow
 import test_python_fpga
+import logging
 class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(mainProgram, self).__init__(parent)
@@ -36,26 +37,61 @@ class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
     mirror_chosenCure = "instant curve"
 
     logname = "LogsDefault.txt"
-    consolelogname = "Console"
+    lognameshiftregister = "LogsDefault.txt"
+    consolelogname = "Console.txt"
+
+    errorFormatter = logging.Formatter('%(asctime)s:%(name)s:%(levelname)s:%(message)s')
+    # format settings for logging handlers
+    infoFormatter = logging.Formatter('%(asctime)s:%(name)s:%(levelname)s:%(message)s')
+
+    errorLogger = logging.getLogger(__name__)  # errorLogger object
+    errorLogger.setLevel(logging.ERROR)
+
+    infoLogger = logging.getLogger(__name__)  # infoLogger object
+    infoLogger.setLevel(logging.INFO)
+
+    info_handler = logging.FileHandler('infoLog' + logname)  # infoHandler setup
+    info_handler.setLevel(logging.INFO)
+    info_handler.setFormatter(infoFormatter)
+
+    error_handler = logging.FileHandler('errorLog' + logname)  # errorHandler setup
+    error_handler.setLevel(logging.ERROR)
+    error_handler.setFormatter(errorFormatter)
+
+    infoLogger.addHandler(info_handler)
+    errorLogger.addHandler(error_handler)
+
+    infoLogger.info("\nProgram initialized with values:\n"
+                    "a_targetTorque = %i\n"
+                    "a_targetSpeed = %i\n" 
+                    "a_direction = %i\n" 
+                    "a_inv_enable = %i \n"
+                    "a_inv_discharge = %i\n"
+                    "a_targetMode = %i\n"
+                    "a_torqueLimit = %i\n"
+                    "a_targetTime = %i\n"
+                    "a_chosenCurve = %i" % (a_targetTorque, a_targetSpeed, a_direction, a_inv_enable, a_inv_discharge
+                                            , a_targetMode, a_torqueLimit, a_targetTime, a_chosenCurve))
 
 
     def getnewcurve(self): #returns number of selected curve
         currentcurvetext = self.comboBoxCurveChoices.currentText()
         print(currentcurvetext)
         if currentcurvetext == "Instant Curve":
-            self.writetolog("f:getnewcurve r:0")
+            self.infoLogger.info("f: getnewcurve r:0")
             return 0
         elif currentcurvetext == "Linear Curve":
-            self.writetolog("f:getnewcurve r:1")
+            self.infoLogger("f:getnewcurve r:1")
             return 1
+
     def setcurrentcurve(self): #sets a_chosenCurve to new chosen curve
         self.a_chosenCurve = self.getnewcurve()
         if self.a_chosenCurve == 0:
-            self.writetolog("f:setcurrentcurve r:0")
             self.labelCurve.setText("Instant Curve")
+            self.infoLogger.info("f:setcurrentcurve r:instant curve")
         elif self.a_chosenCurve == 1:
-            self.writetolog("f:setcurrentcurve r:1")
             self.labelCurve.setText("Linear Curve")
+            self.infoLogger.info("f:setcurrentcurve r:linear curve")
 
     def resetcurrentcurve(self): #puts a_chosenCurve to 0
         self.a_chosenCurve = 0
@@ -79,9 +115,11 @@ class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
             self.labelMode.setText("Torque Mode")
         elif tempmode == 9:
             print("No mode is chosen")
+
     def resetmode(self): #sets a_targetMode to 0
         self.a_targetMode = 0
         print("Mode reset to 0")
+
     def getdirection(self): #returns chosen direction
         if self.radioButtonFoward.isChecked():
             return 1
@@ -89,6 +127,7 @@ class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
             return 0
         else:
             return 9
+
     #def setdirection(self): #sets a_direction to chosen direction
     #    tempdirection = self.getdirection()
     #    if tempdirection == 1:
@@ -99,20 +138,25 @@ class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
     #        self.labelDirection.setText("Backward")
     #    elif tempdirection == 9:
     #        print("No direction is chosen")
+
     def resetdirection(self): #sets a_direction to 0
         self.a_direction = 0
         print("Direction reset to 0")
+
     def inv_enableon(self): #sets inv_enable to 1
         self.a_inv_enable = 1
         print("Enableon set to 1")
+
     def inv_enableoff(self): #sets inv_enable to 0
         self.a_inv_enable = 0
         print("Enableon set to 0")
 
     def resetspeed(self): #sets a_targetSpeed to 0
         self.a_targetSpeed = 0
+
     def resetintime(self): #sets a_targeTime to 0
         self.a_targetTime = 0 #will need to change this?
+
     def resettorquelimit(self): #sets a_torqueLimit to 0
         self.a_torqueLimit = 0
 
@@ -126,31 +170,41 @@ class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
             consolelogstr = str(display_console.read())
         self.textBrowserDisplay.setText(consolelogstr)
         self.textBrowserDisplay.verticalScrollBar().setValue(self.textBrowserDisplay.verticalScrollBar().maximum())
-    def writetolog(self, input):
-        with open(self.logname, 'w') as log_file:
-            log_file.write(input + "\n")
-
-
 
     def on(self): #sets the settings and inv_enable to 1, then sends settings
 
         if (self.radioButtonSpeed.isChecked() or self.radioButtonTorque.isChecked()):
+
+            error_handler1 = logging.FileHandler('errorLog' + self.logname)  # errorHandler setup
+            error_handler1.setLevel(logging.ERROR)
+            error_handler1.setFormatter(self.errorFormatter)
+
+            info_handler1 = logging.FileHandler('infoLog' + self.logname)  # infoHandler setup
+            info_handler1.setLevel(logging.INFO)
+            info_handler1.setFormatter(self.infoFormatter)
+
+            self.infoLogger.removeHandler(self.error_handler)
+            self.errorLogger.removeHandler(self.info_handler)
+
+            self.error_handler = error_handler1
+            self.info_handler = info_handler1
+
+            self.errorLogger.addHandler(self.error_handler)  # binds handler with the logger object
+            self.infoLogger.addHandler(self.info_handler)
+
+            self.infoLogger.info("On function start")
+
+            self.writetoconsolelog("Turn on successful.\nCurve mode is: " + self.mirror_chosenCure + "\nMode is: " +
+                                   self.mirror_targetMode)
+
             self.setcurrentcurve()
             self.setmode()
             self.inv_enableon()
             test_python_fpga.send_settings(self.a_chosenCurve)
             test_python_fpga.send_enable(self.a_inv_enable)
 
-            self.writetolog("'on' function executed correctly.")
-            self.writetoconsolelog("Turn on successful.\nCurve mode is: " + self.mirror_chosenCure + "\nMode is: " +
-                                   self.mirror_targetMode)
-
-
         else:
-            print("Check speed or torque mode")
-            str1 = "hello my name is\n\n\n\n\n\n\n\n\n\n\n\ndf"
-            self.writetolog(str1)
-            self.updateconsole()
+            self.writetoconsolelog("Check speed or torque mode")
 
     def off(self):
         return 0
@@ -161,10 +215,10 @@ class mainProgram(QtWidgets.QMainWindow, Ui_MainWindow):
         if (temp == ""):
             print("Warning: No specified log file chosen. A default name will be used if turned on.")
         else:
-            self.labelCurrentLog.setText(temp)
-            self.logname = temp
-            self.consolelogname = self.consolelogname + temp
-
+            addonstr = temp + '.txt'
+            self.labelCurrentLog.setText(addonstr)
+            self.logname = addonstr
+            self.consolelogname = "Console" + addonstr
 
     def prepdatavalues(self): #retrieves user input and preps it into Prepped Data Values
         targetspeededit = self.lineEditTargetSpeed.text()
